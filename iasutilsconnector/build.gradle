@@ -1,6 +1,12 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'maven-publish'
+import com.vanniktech.maven.publish.SonatypeHost
+
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'maven-publish'
+    id 'com.vanniktech.maven.publish'
+}
+
 
 def getVersionName = { ->
     return inappstory_connector_output_version
@@ -11,15 +17,16 @@ def getArtifactId = { ->
 }
 
 def getGroupId = { ->
-    return "com.github.inappstory"
+    return "com.github.paperrose"
 }
 
 def getGitHubUrl = { ->
-    return "https://github.com/inappstory/android-sdk-utilsconnector"
+    return "https://maven.pkg.github.com/paperrose/inappstory_connector"
 }
 
 android {
     compileSdk 35
+
 
     defaultConfig {
         minSdk 21
@@ -29,6 +36,10 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -50,8 +61,15 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
-        freeCompilerArgs = ['-Xjvm-default=compatibility']
     }
+
+    publishing {
+        singleVariant("maven") {
+            withSourcesJar()
+        }
+    }
+
+    namespace 'com.inappstory.iasutilsconnector'
 }
 
 configurations {
@@ -72,23 +90,64 @@ dependencies {
 
 }
 
-publishing {
-    publications {
-        bar(MavenPublication) {
-            groupId getGroupId()
-            artifactId getArtifactId()
-            version getVersionName()
-            artifact("$buildDir/libs/${getArtifactId()}.jar")
+/*afterEvaluate {
+    publishing {
+
+        publications {
+            bar(MavenPublication) {
+                groupId getGroupId()
+                artifactId getArtifactId()
+                version getVersionName()
+                artifact("$buildDir/outputs/aar/${getArtifactId()}-release.aar")
+            }
+            bar(MavenPublication) {
+                groupId = getGroupId()
+                artifactId = getArtifactId()
+                version = getVersionName()
+                from components.release
+
+            }
+        }
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri(getGitHubUrl())
+                credentials {
+                    username = project.findProperty("gpr.user") as String
+                    password = project.findProperty("gpr.key") as String
+                }
+            }
         }
     }
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri(getGitHubUrl())
-            credentials {
-                username = project.findProperty("gpr.user") as String
-                password = project.findProperty("gpr.key") as String
+}*/
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+    coordinates(getGroupId(), getArtifactId(), getVersionName())
+    pom {
+        name = "Test publishing"
+        description = "Test publishing"
+        inceptionYear = "2025"
+        url = "https://github.com/paperrose/inappstory_connector/"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "https://www.apache.org/licenses/LICENSE-2.0.txt"
             }
+        }
+        developers {
+            developer {
+                id = "paperrose"
+                name = "paperrose"
+                url = "https://github.com/paperrose/"
+            }
+        }
+        scm {
+            url = "https://github.com/paperrose/inappstory_connector/"
+            connection = "scm:git:git://github.com/paperrose/inappstory_connector.git"
+            developerConnection = "scm:git:ssh://git@github.com/paperrose/inappstory_connector.git"
         }
     }
 }
