@@ -17,7 +17,7 @@ def getArtifactId = { ->
 }
 
 def getGroupId = { ->
-    return "com.github.paperrose"
+    return "io.github.paperrose"
 }
 
 def getGitHubUrl = { ->
